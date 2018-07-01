@@ -6,7 +6,7 @@ import { ProductAction, ProductActionType } from "./product.action";
 
 export interface ProductState {
   showProductCode: boolean;
-  currentProduct: Product;
+  currentProductId: number | null;
   products: Product[];
   error: string
 }
@@ -18,7 +18,7 @@ export interface State extends fromRoot.State {
 
 const initialState: ProductState = {
   showProductCode: true,
-  currentProduct: null,
+  currentProductId: null,
   products: [],
   error: ''
 } 
@@ -29,10 +29,28 @@ export const getShowProductCode = createSelector(
   getProductFeatureState,
   state => state.showProductCode
 );
+export const getCurrentProductId = createSelector(
+  getProductFeatureState,
+  state => state.currentProductId
+);
 export const getCurrentProduct = createSelector(
   getProductFeatureState,
-  state => state.currentProduct
+  getCurrentProductId,
+  (state, currentProductId) => {
+    if(currentProductId === 0){
+      return {
+        id: 0,
+        productName: '',
+        productCode: 'New',
+        description: '',
+        starRating: 0
+      }
+    } else {
+      return currentProductId ? state.products.find(p => p.id === currentProductId) : null
+    }
+  }
 );
+
 export const getProducts = createSelector(
   getProductFeatureState,
   state => state.products
@@ -57,25 +75,19 @@ export function reducer(state = initialState, action: ProductAction): ProductSta
     case ProductActionType.SetCurrentProduct:
     return {
       ...state,
-      currentProduct: {...action.payload}
+      currentProductId: action.payload.id
     };
 
     case ProductActionType.ClearCurrentProduct:
     return {
       ...state,
-      currentProduct: null
+      currentProductId: null
     };
 
     case ProductActionType.InicializeCurrentProduct:
     return {
       ...state,
-      currentProduct: {
-        id: 0,
-        productName: '',
-        productCode: 'New',
-        description: '',
-        starRating: 0
-      }
+      currentProductId: 0
     };
 
     case ProductActionType.LoadProductsSuccess:
@@ -91,6 +103,22 @@ export function reducer(state = initialState, action: ProductAction): ProductSta
       products: [],
       error: action.payload
     }
+
+    case ProductActionType.UpdateProductSuccess: 
+      const updatedProducts = state.products.map(
+        el => action.payload.id === el.id ? action.payload : el );
+      return {
+        ...state,
+        products: updatedProducts,
+        currentProductId: action.payload.id,
+        error: ''
+      }
+
+    case ProductActionType.UpdateProductFail: 
+      return {
+        ...state,
+        error: action.payload
+      }
 
     default:
       return state;

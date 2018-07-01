@@ -9,6 +9,7 @@ import { ProductService } from '../product.service';
 import { Action } from '@ngrx/store';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import * as productActions from './product.action';
+import { Product } from '../product';
 
 @Injectable()
 export class ProductEffects {
@@ -25,4 +26,14 @@ export class ProductEffects {
     ))  
   )
 
+
+  @Effect()
+  updateProduct$: Observable<Action> = this.actions$.pipe(
+    ofType(productActions.ProductActionType.UpdateProduct),
+    map((action: productActions.UpdateProduct) => action.payload),
+    mergeMap((product: Product) => this.productService.updateProduct(product).pipe(
+        map(updatedProduct => new productActions.UpdateProductSuccess(updatedProduct)),
+        catchError((error) => of(new productActions.UpdateProductFail(error)) )
+    ))  
+  )
 }
