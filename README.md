@@ -35,3 +35,7 @@ change product slice string to selector
 
 in reducer create getProduct rfeature state via createfeatureselector
 export const getshowproductcode using createselectorr function
+
+
+
+strongly type action

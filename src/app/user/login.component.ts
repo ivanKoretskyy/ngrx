@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import { Store } from "@ngrx/store";
 import { select } from '@ngrx/store';
 import * as fromUser from "./state/user.reducer";
+import * as userAction from './state/user.action';
 
 @Component({
   templateUrl: './login.component.html',
@@ -25,11 +26,9 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
 
-
     this.store.pipe(select(fromUser.getmaskUserName)).subscribe(
       maskUserName => this.maskUserName = maskUserName
         
-      
     )
   }
 
@@ -39,10 +38,7 @@ export class LoginComponent implements OnInit {
 
   checkChanged(value: boolean): void {
     //this.maskUserName = value;
-    this.store.dispatch({
-      type: 'MASK_USER_NAME',
-      payload: value
-    })
+    this.store.dispatch(new userAction.MaskUserName(value))
   }
 
   login(loginForm: NgForm): void {
